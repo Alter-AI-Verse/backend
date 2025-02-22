@@ -30,7 +30,7 @@ const FileStorageSchema = new Schema(
         },
         storageProvider: {
             type: String,
-            enum: ['local', "aws_s3", 'firebase', 'google_drive'],
+            enum: ['local', 'aws_s3', 'firebase', 'google_drive'],
             default: 'local',
         },
         accessLevel: {
@@ -47,6 +47,7 @@ const FileStorageSchema = new Schema(
             default: Date.now,
         },
         expiryDate: {
+            type: String,
             required: false,
         },
         isDeleted: {

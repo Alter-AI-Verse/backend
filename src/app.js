@@ -27,6 +27,9 @@ app.use(cookieParser());
 app.get('/', (req, res) => {
   res.send('Persona-Digital version of You !!');
 })
+app.get('/test', (req, res) => {
+  res.send('Check');
+})
 app.use("/api/v1/auth", authRoutes)
 app.use("/api/v1/upload", uploadRoutes)
 
