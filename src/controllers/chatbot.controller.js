@@ -6,7 +6,7 @@ import { ApiError } from "../utils/ApiError.js";
 const AI_SERVER_URL = process.env.AI_SERVER_URL;
 
 const sendMessage = asyncHandler(async (req, res) => {
-    const { chatbotId, message } = req.body;
+    const { chatbotId, message} = req.body;
 
     if (!chatbotId || !message) {
         throw new ApiError(400, "Chatbot ID and message are required.");
