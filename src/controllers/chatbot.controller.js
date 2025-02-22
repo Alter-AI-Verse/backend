@@ -1,5 +1,5 @@
 import axios from "axios";
-import Conversation from "../models/conversation.model.js";
+import {Conversation} from "../models/conversation.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 

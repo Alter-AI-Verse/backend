@@ -18,7 +18,7 @@ const KnowledgeBaseSchema = new Schema(
             required: true,
         },
         content:{
-            type: Schema.Types.Text,
+            type: String,
             required: true
         },
         processedData:[

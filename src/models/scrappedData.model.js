@@ -22,7 +22,7 @@ const ScrapedDataSchema = new Schema(
             required: true,
         },
         rawContent: {
-            type: Schema.Types.Text,
+            type: String,
             required: true,
         },
         structuredData: {

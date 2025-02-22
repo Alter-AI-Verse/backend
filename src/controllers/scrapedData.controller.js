@@ -1,5 +1,5 @@
 import axios from "axios";
-import ScrapedData from "../models/scrappedData.model.js";
+import {ScrapedData} from "../models/scrappedData.model.js";
 import {asyncHandler} from "../utils/asyncHandler.js";
 import {ApiError} from "../utils/ApiError.js";
 
