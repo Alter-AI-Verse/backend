@@ -4,6 +4,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
 import uploadRoutes from "./routes/upload.routes.js"
+import chatbotRoutes from "./routes/chatbot.routes.js"
+import scrapedRoutes from "./routes/scrapedData.routes.js"
 
 dotenv.config();
 
@@ -32,5 +34,8 @@ app.get('/test', (req, res) => {
 })
 app.use("/api/v1/auth", authRoutes)
 app.use("/api/v1/upload", uploadRoutes)
+app.use("/api/v1/chatbot", chatbotRoutes)
+app.use("/api/v1/scrap", scrapedRoutes)
+
 
 export { app };
