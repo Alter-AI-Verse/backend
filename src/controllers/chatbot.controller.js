@@ -14,7 +14,8 @@ const sendMessage = asyncHandler(async (req, res) => {
 
     const aiResponse = await axios.post(`${AI_SERVER_URL}/ai/generate-response`, {
         chatbotId,
-        message
+        message,
+        
     });
 
     const sentimentAnalysis = await axios.post(`${AI_SERVER_URL}/ai/analyze-sentiment`, {

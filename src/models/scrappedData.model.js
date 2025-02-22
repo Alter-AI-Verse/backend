@@ -4,17 +4,12 @@ const ScrapedDataSchema = new Schema(
     {
         userId: {
             type: Schema.Types.ObjectId,
-            ref: 'User',
+            ref: "User",
             required: true,
-        },
-        chatbotId: {
-            type: Schema.Types.ObjectId,
-            ref: 'ChatBot',
-            required: false,
         },
         sourceType: {
             type: String,
-            enum: ['linkedin', 'twitter', 'facebook', 'instagram', 'github', 'website', 'job_portal', 'other'],
+            enum: ["linkedin", "twitter", "facebook", "instagram", "github", "website", "job_portal", "other"],
             required: true,
         },
         sourceUrl: {
@@ -22,12 +17,8 @@ const ScrapedDataSchema = new Schema(
             required: true,
         },
         rawContent: {
-            type: String,
-            required: true,
-        },
-        structuredData: {
             type: Schema.Types.Mixed,
-            required: false,
+            required: true,
         },
         lastScrapedAt: {
             type: Date,
@@ -35,8 +26,8 @@ const ScrapedDataSchema = new Schema(
         },
         updateFrequency: {
             type: String,
-            enum: ['daily', 'weekly', 'monthly', 'manual'],
-            default: 'manual',
+            enum: ["daily", "weekly", "monthly", "manual"],
+            default: "manual",
         },
         isProcessed: {
             type: Boolean,
@@ -53,10 +44,11 @@ const ScrapedDataSchema = new Schema(
                 },
             },
         ],
+        failedScrapes: [String],
     },
     {
         timestamps: true,
     }
 );
 
-export const ScrapedData = mongoose.model("ScrapedData", ScrapedDataSchema);
+export const ScrapedData = mongoose.model('ScrapedData', ScrapedDataSchema)

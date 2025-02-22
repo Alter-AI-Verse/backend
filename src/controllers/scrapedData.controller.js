@@ -1,30 +1,32 @@
-import axios from "axios";
 import {ScrapedData} from "../models/scrappedData.model.js";
-import {asyncHandler} from "../utils/asyncHandler.js";
-import {ApiError} from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
 
-const AI_SERVER_URL = process.env.AI_SERVER_URL;
+export const saveScrapedData = asyncHandler(async (req, res) => {
+    const { userId, platform, sourceUrl, scrapedContent } = req.body;
 
-export const fetchScrapedData = asyncHandler(async (req, res) => {
-    const { platform } = req.params; 
-    const { userId } = req.user;
-    const { url } = req.body;
-
-    if (!platform) {
-        throw new ApiError(400, "Platform is required.");
+    if (!userId || !platform || !sourceUrl || !scrapedContent) {
+        throw new ApiError(400, "Invalid data received from AI server.");
     }
 
-    const scrapedResponse = await axios.get(`${AI_SERVER_URL}/scrape/${platform}?url=${url}`);
+    let existingData = await ScrapedData.findOne({ userId, sourceType: platform });
 
-    if (!scrapedResponse.data || scrapedResponse.data.length === 0) {
-        throw new ApiError(404, `No data found for ${platform}`);
+    if (existingData) {
+        existingData.rawContent = JSON.stringify(scrapedContent);
+        existingData.lastScrapedAt = Date.now();
+        await existingData.save();
+
+        return res.status(200).json({
+            message: `Updated scraped data for ${platform}.`,
+            data: existingData,
+        });
     }
 
     const newScrapedData = new ScrapedData({
         userId,
-        chatbotId: req.body.chatbotId || null,
         sourceType: platform,
-        rawContent: JSON.stringify(scrapedResponse.raw_data),
+        sourceUrl,
+        rawContent: JSON.stringify(scrapedContent),
         isProcessed: false,
     });
 
@@ -37,9 +39,20 @@ export const fetchScrapedData = asyncHandler(async (req, res) => {
 });
 
 export const getAllScrapedData = asyncHandler(async (req, res) => {
-    const { userId } = req.user;
+    const { platform } = req.query;
+    const userId = req.user._id;
 
-    const scrapedData = await ScrapedData.find({ userId });
+    let query = { userId };
+    if (platform) {
+        query.sourceType = platform;
+    }
+
+    const scrapedData = await ScrapedData.find(query).sort({ lastScrapedAt: -1 });
+
+    if (!scrapedData || scrapedData.length === 0) {
+        return res.status(404).json({ message: "No scraped data found." });
+    }
 
     res.status(200).json({ scrapedData });
 });
+    
