@@ -14,7 +14,7 @@ const ScrapedDataSchema = new Schema(
         },
         sourceType: {
             type: String,
-            enum: ['linkedin', 'twitter', 'facebook', 'website', 'job_portal', 'other'],
+            enum: ['linkedin', 'twitter', 'facebook', 'instagram', 'github', 'website', 'job_portal', 'other'],
             required: true,
         },
         sourceUrl: {
