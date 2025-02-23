@@ -2,56 +2,59 @@ import axios from "axios";
 import {Conversation} from "../models/conversation.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
+import mongoose from "mongoose";
 
 const AI_SERVER_URL = process.env.AI_SERVER_URL;
 
 const sendMessage = asyncHandler(async (req, res) => {
     const { chatbotId, message} = req.body;
-
+    console.log(typeof chatbotId,chatbotId)
     if (!chatbotId || !message) {
         throw new ApiError(400, "Chatbot ID and message are required.");
     }
 
-    const aiResponse = await axios.post(`${AI_SERVER_URL}/ai/generate-response`, {
-        chatbotId,
-        message,
-        
-    });
+    // const aiResponse = await axios.post(`${AI_SERVER_URL}/ai/generate-response`, {
+    //     chatbotId,
+    //     message,
+    //     // knowledgeBase
+    // });
 
-    const sentimentAnalysis = await axios.post(`${AI_SERVER_URL}/ai/analyze-sentiment`, {
-        message
-    });
+    // const sentimentAnalysis = await axios.post(`${AI_SERVER_URL}/ai/analyze-sentiment`, {
+    //     message
+    // });
 
     const newMessage = {
         sender: "user",
         message,
-        sentiment: sentimentAnalysis.data.sentiment
+        // sentiment: sentimentAnalysis.data.sentiment
     };
 
     const botReply = {
         sender: "bot",
-        message: aiResponse.data.response,
+        message: "test",
         sentiment: "neutral"
     };
-
+    
+    
     let conversation = await Conversation.findOne({ userId: req.user._id, chatbotId });
+    return res.status(200).json({message:'hello'})
 
-    if (!conversation) {
-        conversation = new Conversation({
-            userId: req.user._id,
-            chatbotId,
-            messages: [newMessage, botReply]
-        });
-    } else {
-        conversation.messages.push(newMessage, botReply);
-    }
+    // if (!conversation) {
+    //     conversation = new Conversation({
+    //         userId: req.user._id,
+    //         chatbotId,
+    //         messages: [...newMessage,...botReply]
+    //     });
+    // } else {
+    //     conversation.messages.push(newMessage, botReply);
+    // }
 
-    await conversation.save();
+    // await conversation.save();
 
-    res.status(200).json({
-        chatbotResponse: aiResponse.data.response,
-        sentiment: sentimentAnalysis.data.sentiment
-    });
+    // res.status(200).json({
+    //     chatbotResponse: aiResponse.data.response,
+    //     sentiment: sentimentAnalysis.data.sentiment
+    // });
 });
 
 const getConversation = asyncHandler(async (req, res) => {
@@ -65,11 +68,18 @@ const getConversation = asyncHandler(async (req, res) => {
     res.status(200).json(conversation);
 });
 
+// const getAllConversations = asyncHandler(async (req, res) => {
+//     const conversations = await Conversation.find({ 
+//         userId: req.user._id 
+//     }, 
+//         "_id chatbotId lastInteraction"
+//     );
+//     res.status(200).json({ conversations });
+// });
+
 const getAllConversations = asyncHandler(async (req, res) => {
-    const conversations = await Conversation.find({ 
-        userId: req.user._id }, 
-        "_id chatbotId lastInteraction"
-    );
+    const { userId } = req.user._id;
+    const conversations = await Conversation.find(userId);
     res.status(200).json({ conversations });
 });
 
