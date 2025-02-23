@@ -6,11 +6,16 @@ import {
     deleteConversation,
     fetchScrapedData,
     trainChatbot,
-    getChatbotAnalytics
+    getChatbotAnalytics,
+    createChatbot,
+    interactWithPublicBot
 } from "../controllers/chatbot.controller.js";
 import {verifyJWT} from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
+
+router.post("/", verifyJWT, createChatbot);
+router.post("/public/:publicLink", interactWithPublicBot);
 
 router.post("/message", verifyJWT, sendMessage);
 router.get("/conversation/:id", verifyJWT, getConversation);

@@ -3,25 +3,27 @@ import {Conversation} from "../models/conversation.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import mongoose from "mongoose";
+import { User } from "../models/user.model.js";
+import { ChatBot } from "../models/chatbot.model.js";
 
 const AI_SERVER_URL = process.env.AI_SERVER_URL;
 
 const sendMessage = asyncHandler(async (req, res) => {
-    const { chatbotId, message} = req.body;
+    const { chatbotId, query: message} = req.body;
     console.log(typeof chatbotId,chatbotId)
     if (!chatbotId || !message) {
         throw new ApiError(400, "Chatbot ID and message are required.");
     }
 
-    // const aiResponse = await axios.post(`${AI_SERVER_URL}/ai/generate-response`, {
-    //     chatbotId,
-    //     message,
-    //     // knowledgeBase
-    // });
+    const aiResponse = await axios.post(`${AI_SERVER_URL}/chat`, {
+        chatbotId,
+        query,
+        // knowledgeBase
+    });
 
-    // const sentimentAnalysis = await axios.post(`${AI_SERVER_URL}/ai/analyze-sentiment`, {
-    //     message
-    // });
+    const sentimentAnalysis = await axios.post(`${AI_SERVER_URL}/ai/analyze-sentiment`, {
+        message
+    });
 
     const newMessage = {
         sender: "user",
@@ -34,48 +36,31 @@ const sendMessage = asyncHandler(async (req, res) => {
         message: "test",
         sentiment: "neutral"
     };
-    
-    
+
     let conversation = await Conversation.findOne({ userId: req.user._id, chatbotId });
     return res.status(200).json({message:'hello'})
 
-    // if (!conversation) {
-    //     conversation = new Conversation({
-    //         userId: req.user._id,
-    //         chatbotId,
-    //         messages: [...newMessage,...botReply]
-    //     });
-    // } else {
-    //     conversation.messages.push(newMessage, botReply);
-    // }
-
-    // await conversation.save();
-
-    // res.status(200).json({
-    //     chatbotResponse: aiResponse.data.response,
-    //     sentiment: sentimentAnalysis.data.sentiment
-    // });
 });
 
 const getConversation = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const conversation = await Conversation.findById(id);
-    
+
+    const conversation = await Conversation.findById(id).populate("userId", "fullName")
     if (!conversation) {
         throw new ApiError(404, "Conversation not found.");
     }
 
-    res.status(200).json(conversation);
+    const updatedMessages = conversation.messages.map(msg => ({
+        ...msg.toObject(),
+        senderFullName: msg.sender === "user" ? conversation.userId.fullName : "Chatbot"
+    }));
+
+    res.status(200).json({
+        ...conversation.toObject(),
+        messages: updatedMessages
+    });
 });
 
-// const getAllConversations = asyncHandler(async (req, res) => {
-//     const conversations = await Conversation.find({ 
-//         userId: req.user._id 
-//     }, 
-//         "_id chatbotId lastInteraction"
-//     );
-//     res.status(200).json({ conversations });
-// });
 
 const getAllConversations = asyncHandler(async (req, res) => {
     const { userId } = req.user._id;
@@ -125,6 +110,51 @@ const getChatbotAnalytics = asyncHandler(async (req, res) => {
     res.status(200).json(analyticsData.data);
 });
 
+const createChatbot = asyncHandler(async (req, res) => {
+    const { botName, description } = req.body;
+
+    if (!botName) {
+        throw new ApiError(400, "Bot name is required.");
+    }
+
+    const newChatbot = new ChatBot({
+        userId: req.user._id,
+        botName,
+        description,
+    });
+
+    await newChatbot.save();
+
+    res.status(201).json({
+        message: "Chatbot created successfully!",
+        chatbot: newChatbot,
+        publicLink: `https://www.alter.ai/bot/${newChatbot.publicLink}`
+    });
+});
+
+const interactWithPublicBot = asyncHandler(async (req, res) => {
+    const { publicLink } = req.params;
+    const { message } = req.body;
+
+    if (!message) {
+        throw new ApiError(400, "Message is required.");
+    }
+
+    const chatbot = await ChatBot.findOne({ publicLink });
+    if (!chatbot) {
+        throw new ApiError(404, "Chatbot not found.");
+    }
+
+    const aiResponse = await axios.post(`${AI_SERVER_URL}/ai/generate-response`, {
+        chatbotId: chatbot._id,
+        message,
+    });
+
+    res.status(200).json({
+        chatbotResponse: aiResponse.data.response
+    });
+});
+
 export {
     sendMessage,
     getConversation,
@@ -133,4 +163,6 @@ export {
     fetchScrapedData,
     trainChatbot,
     getChatbotAnalytics,
+    createChatbot,
+    interactWithPublicBot
 };

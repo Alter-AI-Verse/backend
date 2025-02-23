@@ -1,4 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
+import crypto from "crypto";
 
 const ChatBotSchema = new Schema(
     {
@@ -19,6 +20,13 @@ const ChatBotSchema = new Schema(
         avatar:{
             type: String,
             default: '/defaultBotAvatar.png'
+        },
+        publicLink: {
+            type: String,
+            unique: true,
+            default: function () {
+                return crypto.randomBytes(6).toString("hex");
+            }
         },
         personality:{
             type: String,

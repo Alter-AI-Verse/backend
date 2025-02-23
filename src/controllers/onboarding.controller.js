@@ -20,24 +20,8 @@ export const saveOnboardingData = asyncHandler(async (req, res) => {
 
     await onboardingData.save();
 
-    const scrapeRequests = Object.entries(socialLinks)
-        .filter(([platform, url]) => url)
-        .map(([platform, url]) =>
-            axios.post(`${AI_SERVER_URL}/scrape`, {
-                userId: req.user._id,
-                platform,
-                url
-            })
-        );
-
-    const results = await Promise.allSettled(scrapeRequests);
-    const failedScrapes = results
-        .filter(result => result.status === "rejected")
-        .map((_, index) => Object.keys(socialLinks)[index]);
-
     res.status(201).json({ 
-        message: "Onboarding completed. Scraping initiated!", 
+        message: "Onboarding completed.", 
         onboardingData,
-        failedScrapes
     });
 });

@@ -7,6 +7,7 @@ import uploadRoutes from "./routes/upload.routes.js"
 import chatbotRoutes from "./routes/chatbot.routes.js"
 import scrapedRoutes from "./routes/scrapedData.routes.js"
 import onboardingRoutes from "./routes/onboarding.routes.js"
+import { getScrapedData } from "./controllers/scrapedData.controller.js";
 
 dotenv.config();
 
@@ -38,6 +39,6 @@ app.use("/api/v1/upload", uploadRoutes)
 app.use("/api/v1/chatbot", chatbotRoutes)
 app.use("/api/v1/scrap", scrapedRoutes)
 app.use("/api/v1/onboarding", onboardingRoutes)
-
+app.use(`${process.env.AI_SERVER_URL}/scrap`, getScrapedData)
 
 export { app };

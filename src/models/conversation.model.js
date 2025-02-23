@@ -48,6 +48,9 @@ const ConversationSchema = new Schema(
             ref: 'User',
             required: true,
         },
+        fullName: {
+            type: String,
+        },
         chatbotId: {
             type: Schema.Types.ObjectId,
             ref: 'ChatBot',
